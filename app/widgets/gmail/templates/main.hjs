@@ -1,1 +1,99 @@
+{{#url}}
 <iframe src="{{url}}" sandbox="allow-same-origin allow-popups allow-forms allow-scripts" seamless></iframe>
+{{/url}}
+
+
+{{^url}}
+
+{{#page_list}}
+<h2 class="header">
+  Gmail
+  <div class="header-right">
+		<div class="top-row-btn refresh-btn icon m-icon">cached</div>
+    <a href="#" class="label-link">{{label}}</a>
+  </span>
+</h2>
+<div class="messages">
+	{{#messages}}
+		<a class="message {{#isRead}}read{{/isRead}}" href="#" data-id="{{id}}">
+			<div class="info">
+				<div class="fromdate">
+					<span class="from">{{from}}</span>
+					<span class="date">{{date}}</span>
+				</div>
+				<div class="subject">{{subject}}</div>
+				<div class="snippet">{{snippet}}</div>
+			</div>
+		</a>
+	{{/messages}}
+	{{^messages}}
+		{{#authorize}}
+			<div class="authorize">
+				{{i18n.authorize}}
+				<button type="button" class="btn btn-lg btn-primary">{{i18n.authorize_btn}}</button>
+			</div>
+		{{/authorize}}
+		{{^authorize}}
+			<div class="rotating-section">
+				<span class="icon m-icon rotating-icon">autorenew</span>
+			</div>
+		{{/authorize}}
+	{{/messages}}
+</div>
+{{/page_list}}
+
+<!-- Page "Labels" -->
+
+{{#page_labels}}
+<h2 class="header">
+  <span class="header-left">
+		<span class="top-row-btn back-btn icon m-icon">arrow_back</span>
+		<span>Gmail</span>
+  </span>
+</h2>
+<div class="labels">
+	{{#labels.0}}<h2 class="title">Select a label:</h2>{{/labels.0}}
+	{{#labels}}
+		<a class="item" href="#" data-id="{{id}}">
+			<div class="info">
+				<div class="name">{{name}}</div>
+			</div>
+		</a>
+	{{/labels}}
+	{{^labels}}
+		<div class="rotating-section">
+			<span class="icon m-icon rotating-icon">autorenew</span>
+		</div>
+	{{/labels}}
+</div>	
+{{/page_labels}}
+
+<!-- Page "Messages" -->
+
+{{#page_message}}
+<h2 class="header">
+  <span class="header-left">
+		<span class="top-row-btn back-btn icon m-icon">arrow_back</span>
+		<span>Gmail</span>
+  </span>
+</h2>
+{{#email}}
+<div class="email">
+		<div class="from">From: {{from}}</div>
+		<div class="to">To: {{to}}</div>
+		<div class="date">Date: {{date}}</div>
+    <div class="info">
+    </div>
+    <div class="subject">{{subject}}</div>
+    <div class="text">{{{text}}}</div>
+</div>	
+{{/email}}
+{{^email}}
+		<div class="rotating-section">
+			<span class="icon m-icon rotating-icon">autorenew</span>
+		</div>
+{{/email}}
+{{/page_message}}
+
+{{/url}}
+

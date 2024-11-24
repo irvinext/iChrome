@@ -1,7 +1,7 @@
 {
 	"id": 25,
 	"sort": 160,
-	"tabbed": true,
+	"tabbed": false,
 	"name": "gmail",
 	"model": "model",
 	"css": "style.css",
@@ -20,12 +20,6 @@
 	},
 
 	"settings": [{
-		"type": "text",
-		"name": "user",
-		"label": "i18n.settings.account",
-		"help": "i18n.settings.account_help",
-		"placeholder": "i18n.settings.account_placeholder"
-	},{
 		"type": "number",
 		"label": "i18n.settings.height",
 		"name": "height",
@@ -37,9 +31,22 @@
 		"label": "i18n.settings.type.name",
 		"help": "i18n.settings.type.help",
 		"options": {
+			"api": "i18n.settings.type.api",
 			"new": "i18n.settings.type.new",
 			"old": "i18n.settings.type.old"
 		}
+	},{
+		"type": "text",
+		"name": "user",
+		"label": "i18n.settings.account",
+		"help": "i18n.settings.account_help",
+		"placeholder": "i18n.settings.account_placeholder"
+	},{
+		"type": "number",
+		"name": "messages_shown",
+		"label": "i18n.settings.messages_shown",
+		"min": 1,
+		"max": 30
 	}],
 
 	"strings": {
@@ -51,9 +58,12 @@
 					"name": "Version",
 					"new": "Basic",
 					"old": "Original",
+					"api": "API",
 					"help": "The Basic is the default version which works in all browser versions.\n<br /><br />\nYou can also choose the Original version which proposes more functionality but it can be unstable in some new browser versions and possibly requires the disabling of the new \"SameSite by default cookies\" feature on the chrome://flags web page."
-				}
+				},
+				"messages_shown": "Max messages (API)"
 			}
 		}
 	}
+
 }

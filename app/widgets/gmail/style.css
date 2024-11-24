@@ -1,5 +1,5 @@
 /*---------------------------------------------
-	/ Main Styles
+	/ Main Styles in iframe mode
 */
 .content {
 	height: 100%;
@@ -8,4 +8,272 @@
 iframe {
 	width: 100%;
 	height: 100%;
+}
+
+
+/*---------------------------------------------
+	/ Main Styles in API mode
+*/
+:root {
+	font-family: inherit;
+}
+
+.messages {
+	padding: 0;
+	max-height: 600px;
+	overflow-x: hidden;
+}
+
+.grid :root .messages {
+	max-height: 100%;
+}
+
+.grid :root .header ~ .messages {
+	max-height: calc(100% - 45px);
+}
+
+.message {
+	color: #333;
+	display: block;
+	min-height: 75px;
+	position: relative;
+	text-decoration: none;
+	border-top: 1px solid #EEE;
+}
+
+.dark .message {
+	color: #DDD;
+	border-top-color: #222;
+}
+
+.dark.transparent .message {
+	color: #EEE;
+	border-top-color: rgba(0, 0, 0, .1);
+}
+
+.message:hover {
+	background-color: rgba(0, 0, 0, 0.01);
+}
+
+.dark .message:hover {
+	background: rgba(0, 0, 0, .15);
+}
+
+/* .message:hover:after {
+	right: 15px;
+	color: #888;
+	font-size: 30px;
+	content: "\E6D4";
+	line-height: 15px;
+	position: absolute;
+	font-family: Entypo;
+	top: calc(50% - (15px / 2));
+} */
+
+.message .info {
+	padding: 15px;
+}
+
+.message .fromdate {
+	font-size: 18px;
+	overflow: hidden;
+	line-height: 20px;
+	white-space: nowrap;
+	font-weight: bold;
+	display: flex;
+	justify-content: space-between;
+}
+
+.message .fromdate .from {
+	flex-shrink: 1; /* Allow shrinking */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: calc(100% - 70px); /* Adjust the max-width as needed */
+}
+
+.message .fromdate .date {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex-shrink: 0; /* Avoid shrinking */
+	margin-left: 10px; /* Add margin between .from and .date */
+}
+
+.message span.date {
+	font-weight: normal;
+	font-size: 14px;
+	color: darkgray;
+}
+
+.message .subject {
+  font-weight: bold;
+  overflow: hidden; /* Truncate text with ellipses */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message .snippet {
+  color: grey;
+  overflow: hidden; /* Truncate text with ellipses */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message.read .fromdate {
+	font-weight: normal;
+}
+
+.message.read .subject {
+	font-weight: normal;
+}
+
+/* .message .icon {
+	float: left;
+	width: 75px;
+	height: 75px;
+	margin-right: 15px;
+	background: #F5F5F5 center no-repeat;
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAB0SURBVFiF7dSxDYAwDERRj5cxWIY5MkrGocwIBroIEXIRnEVxln5rv8rm7taW1s1flm0w7T37CFBnEAxAOVpQBAVwLkYRNACKoAIQBB0wQoQAnhBhgB4iFHCHCAdcEaxPWIAqCzCVAAIIIIAAAggggAC/Auz27D1Yc1xjaQAAAABJRU5ErkJggg==");
+}
+
+.dark .message .icon {
+	background-color: #2A2A2A;
+} 
+
+.dark.transparent .message .icon {
+	background-color: rgba(0, 0, 0, .1);
+}*/
+
+
+
+
+/* Use flexbox to display the header elements in a row */
+.header {
+  display: flex;
+  align-items: center;
+	justify-content: space-between;
+}
+
+.header-right {
+  display: flex;
+  align-items: right;
+}
+
+.header-left {
+  display: flex;
+  align-items: left;
+}
+
+/* Use margin-left to create some space between the text and the button */
+.top-row-btn {
+  margin-right: 10px;
+	cursor: pointer;
+	line-height: 45px;
+}
+
+
+/* Use vertical-align to align the link with the button */
+.label-link {
+  vertical-align: middle;
+}	
+
+.icon.m-icon {
+	color: #428bca;
+} 
+
+.rotating-section {
+	width: 100%;
+	text-align: center;
+}
+
+.icon.m-icon.rotating-icon {
+	animation: rotate 2s linear infinite;
+	font-size: 4em;
+	color: grey;
+	/* transform-origin: 50% 50% */
+}
+
+@keyframes rotate {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/*---------------------------------------------
+	/ Labels page
+*/
+
+.labels {
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.labels .title {
+	margin-top: 10px;
+	margin-bottom: 20px;
+	font-size: 18px;
+	font-weight: normal;
+}
+
+.labels .item .name {
+	font-size: 18px;
+	line-height: 20px;
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+
+/** Message page ***/
+
+.email {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  padding: 15px;
+	height: 100%;
+	overflow: scroll;
+}
+
+.email .info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.email .from {
+  font-weight: bold;
+}
+
+.email .date {
+  color: #666;
+}
+
+.email .subject {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.email .text {
+	white-space: pre-line;
+  word-wrap: break-word;
+}
+
+
+
+/*---------------------------------------------
+	/ Authorize
+*/
+.authorize {
+	padding: 20px;
+	text-align: center;
+}
+
+.authorize .btn {
+	width: 100%;
+	margin-top: 15px;
 }
