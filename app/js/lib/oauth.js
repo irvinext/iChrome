@@ -32,7 +32,8 @@ define(["jquery", "lodash", "browser/api"], function($, _, Browser) {
 			tokenURL: "https://www.googleapis.com/oauth2/v3/token",
 			tokenParams: "code={{code}}&client_id={{clientID}}&client_secret={{secret}}&redirect_uri={{redirectURL}}&grant_type=authorization_code",
 			refreshParams: "client_id={{clientID}}&client_secret={{secret}}&refresh_token={{refreshToken}}&grant_type=refresh_token",
-			redirectURL: "https://ichro.me/auth"
+			//redirectURL: "https://ichro.me/auth"
+			redirectURL: "https://" + chrome.runtime.id + ".chromiumapp.org/oauth2"
 		}, config);
 
 		this.data = {};
@@ -208,6 +209,83 @@ define(["jquery", "lodash", "browser/api"], function($, _, Browser) {
 		 * @param   {Function}  cb  The callback, called with `this`
 		 */
 		startAuthFlow: function(cb) {
+			var that = this;
+			
+			// Check if chrome APIs are available
+			if (typeof chrome === 'undefined') {
+				this.showPermissionError("Chrome extension APIs are not available in this context.");
+				cb.call(this, false);
+				return;
+			}
+			
+			// First, check if permission API is available
+			if (!chrome.permissions) {
+				// Fall back to checking if identity is directly available
+				if (chrome.identity && chrome.identity.launchWebAuthFlow) {
+					this.proceedWithAuthFlow(cb);
+				} else {
+					this.showPermissionError("Required permissions are not available.");
+					cb.call(this, false);
+				}
+				return;
+			}
+			
+			// Request identity permission
+			chrome.permissions.request({
+				permissions: ['identity']
+			}, function(granted) {
+				if (granted) {
+					// Permission granted, proceed with auth flow
+					that.proceedWithAuthFlow(cb);
+				} else {
+					// Permission denied, show error
+					that.showPermissionError("This functionality requires the 'identity' permission to authenticate with external services.");
+					cb.call(that, false);
+				}
+			});
+		},
+
+		/**
+		 * Shows an error popup about missing permissions
+		 * 
+		 * @param {String} message The error message to display
+		 */
+		showPermissionError: function(message) {
+			// Create a simple modal dialog
+			var overlay = document.createElement('div');
+			overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center;';
+			
+			var modal = document.createElement('div');
+			modal.style.cssText = 'background:#fff;padding:20px;border-radius:5px;max-width:400px;box-shadow:0 2px 10px rgba(0,0,0,0.2);';
+			
+			var title = document.createElement('h3');
+			title.textContent = 'Permission Required';
+			title.style.margin = '0 0 10px';
+			
+			var content = document.createElement('p');
+			content.textContent = message;
+			
+			var button = document.createElement('button');
+			button.textContent = 'OK';
+			button.style.cssText = 'padding:8px 16px;background:#4285f4;color:#fff;border:none;border-radius:3px;float:right;cursor:pointer;';
+			button.addEventListener('click', function() {
+				document.body.removeChild(overlay);
+			});
+			
+			modal.appendChild(title);
+			modal.appendChild(content);
+			modal.appendChild(button);
+			overlay.appendChild(modal);
+			
+			document.body.appendChild(overlay);
+		},
+
+		/**
+		 * Proceeds with the actual auth flow after permissions are granted
+		 * 
+		 * @param {Function} cb The callback function
+		 */
+		proceedWithAuthFlow: function(cb) {
 			var redirectURL = this.config.redirectURL
 				.replace("{{name}}", encodeURIComponent(this.config.name));
 
@@ -216,79 +294,40 @@ define(["jquery", "lodash", "browser/api"], function($, _, Browser) {
 				.replace("{{scope}}", encodeURIComponent(this.config.scope || ""))
 				.replace("{{redirectURL}}", encodeURIComponent(redirectURL));
 
-
 			var that = this;
 
-			var createWindow = function() {
-				that.openWindow = true;
+				// Launch the web auth flow
+				chrome.identity.launchWebAuthFlow(
+					{
+						url: url,
+						interactive: true
+					},
+					function(responseUrl) {
+						// Check for error or user cancellation
+						if (chrome.runtime.lastError || !responseUrl) {
+							console.error("Auth flow failed:", chrome.runtime.lastError);
+							cb.call(that, false);
+							return;
+						}
 
-				Browser.windows.create({
-					url: url,
-					width: 560,
-					height: 600,
-					type: "normal",
-					focused: true,
-					top: Math.round((screen.availHeight - 600) / 2),
-					left: Math.round((screen.availWidth - 560) / 2)
-				}, function(win) {
-					that.openWindow = win.id;
+						// Parse the response URL to extract the authorization code
+						var url = new URL(responseUrl);
+						var params = {};
+						
+						// Extract URL parameters
+						url.searchParams.forEach(function(value, key) {
+							params[key] = value;
+						});
 
-					Browser.webRequest.onBeforeRequest.addListener(
-						function(info) {
-							// Adapted from http://stackoverflow.com/a/3855394/900747
-							var params = {},
-								idx;
-
-							_.each(new URL(info.url).search.substr(1).split("&"), function(e) {
-								idx = e.indexOf("=");
-
-								if (idx === -1) {
-									params[e] = "";
-								}
-								else {
-									params[e.substring(0, idx)] = decodeURIComponent(e.substr(idx + 1).replace(/\+/g, " "));
-								}
-							});
-
-
-							if (params[this.config.codeParam]) {
-								this.exchangeCode(params[this.config.codeParam], cb);
-							}
-
-							Browser.windows.remove(win.id);
-
-							return {
-								cancel: true
-							};
-						}.bind(that),
-						{
-							windowId: win.id,
-							types: ["main_frame"],
-							urls: [redirectURL + "*"]
-						},
-						["blocking"]
-					);
-				});
-			};
-
-			if (typeof this.openWindow === "number") {
-				Browser.windows.get(this.openWindow, function(win) {
-					if (Browser.runtime.lastError) {
-						createWindow();
+						if (params[that.config.codeParam]) {
+							// Exchange the code for tokens
+							that.exchangeCode(params[that.config.codeParam], cb);
+						} else {
+							cb.call(that, false);
+						}
 					}
-					else {
-						Browser.windows.update(win.id, { focused: true });
-					}
-				});
-			}
-			else if (this.openWindow === true) {
-				return;
-			}
-			else {
-				createWindow();
-			}
+				);
 		},
-
 
 		/**
 		 * Requests a token set from the tokenURL using the received code

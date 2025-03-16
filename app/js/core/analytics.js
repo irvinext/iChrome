@@ -6,6 +6,9 @@ define(["lodash", "browser/api", "core/status", "core/auth", "fbanalytics"], fun
 		sendTimeout = null,
 		pageTime, totalLoad, toolbarStyle;
 
+	//MF3: added the stub for FB "track" object		
+	var track ={};
+	
 	window.addEventListener("beforeunload", function() {
 		if (sendTimeout) {
 			clearTimeout(sendTimeout);
@@ -36,54 +39,60 @@ define(["lodash", "browser/api", "core/status", "core/auth", "fbanalytics"], fun
 		sendQueue = [];
 	};
 
+	//MF3 : https://developer.chrome.com/docs/extensions/develop/migrate/improve-security#remove-remote-code
 	// GA setup
-	(function() {
-		// Uncompressed Google Analytics insertion code
-		window.GoogleAnalyticsObject = "ga";
+	// (function () {
+	// 	// Uncompressed Google Analytics insertion code
+	// 	window.GoogleAnalyticsObject = "ga";
 
-		window.ga = window.ga || function() {
-			(window.ga.q = window.ga.q || []).push(arguments);
-		};
+	// 	window.ga = window.ga || function () {
+	// 		(window.ga.q = window.ga.q || []).push(arguments);
+	// 	};
 
-		window.ga.l = new Date().getTime();
-
-
-		var script = document.createElement("script"),
-			firstScript = document.getElementsByTagName("script")[0];
-
-		script.async = true;
-		script.src = "https://www.google-analytics.com/analytics.js";
-
-		firstScript.parentNode.insertBefore(script, firstScript);
+	// 	window.ga.l = new Date().getTime();
 
 
-		/* global ga */
-		ga("create", "UA-41131844-4", "auto"); // This is temporarily set to a blank profile since the page is reloaded hundreds of times during development.
+	// 	var script = document.createElement("script"),
+	// 		firstScript = document.getElementsByTagName("script")[0];
 
-		ga("set", "checkProtocolTask", function() {}); // Fixes the incompatibility with Chrome extensions: https://code.google.com/p/analytics-issues/issues/detail?id=312#c2
+	// 	script.async = true;
+	// 	script.src = "https://www.google-analytics.com/analytics.js";
 
-		ga("set", "transport", "beacon");
+	// 	firstScript.parentNode.insertBefore(script, firstScript);
 
-		ga("require", "displayfeatures");
 
-		ga("set", "dimension1", Auth.isPro ? "Pro" : Auth.adFree ? "Ad-free" : Auth.isSignedIn ? "Signed in" : "Anonymous");
-	})();
+	// 	/* global ga */
+	// 	ga("create", "UA-41131844-4", "auto"); // This is temporarily set to a blank profile since the page is reloaded hundreds of times during development.
 
-	var track = function() {
-		track.event.call(track, arguments);
-	};
+	// 	ga("set", "checkProtocolTask", function () { }); // Fixes the incompatibility with Chrome extensions: https://code.google.com/p/analytics-issues/issues/detail?id=312#c2
 
-	Object.defineProperty(track, "ga", { get: function() {
-		return ga;
-	} });
+	// 	ga("set", "transport", "beacon");
 
-	track.FB = FB;
+	// 	ga("require", "displayfeatures");
+
+	// 	ga("set", "dimension1", Auth.isPro ? "Pro" : Auth.adFree ? "Ad-free" : Auth.isSignedIn ? "Signed in" : "Anonymous");
+	// })();
+
+	// var track = function() {
+	// 	track.event.call(track, arguments);
+	// };
+
+	// Object.defineProperty(track, "ga", { get: function() {
+	// 	return ga;
+	// } });
+
+	// track.FB = FB;
+	// End MF3 commenting
+
+
+
 
 	/*
 		This wraps the Analytics event tracker.
 
 		Usage: Track.event("GSShare", "Twitter");
 	*/
+	// MF3: Cannot set properties of undefined (setting 'event')
 	track.event = function(category, action, label, value, nin) {
 		if (nin) { // All previous parameters have been defined
 			ga("send", "event", category, action, label.toString(), value, {
@@ -239,10 +248,25 @@ define(["lodash", "browser/api", "core/status", "core/auth", "fbanalytics"], fun
 	};
 
 
-	// Track pageview with GA and internal counter
-	track.pageview();
+	//MF3: https://developer.chrome.com/docs/extensions/develop/migrate/improve-security#remove-remote-code
+	// // Track pageview with GA and internal counter
+	// track.pageview();
 
-	Browser.storage.uses = parseInt(Browser.storage.uses || 0) + 1;
+	// Browser.storage.uses = parseInt(Browser.storage.uses || 0) + 1;
 
+	// return track;
+
+	//MF3: added the stub for FB
+	track = {
+		FB: {
+			logEvent: function() {}
+		},
+		queue: function() {},
+		pageDone: function() {},
+		pageview: function() {},
+		time: function() {},
+		event: function() {},
+		ga: function() {}
+	};
 	return track;
 });

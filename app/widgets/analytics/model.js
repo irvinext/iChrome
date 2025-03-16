@@ -28,7 +28,8 @@ define(["lodash", "jquery", "moment", "widgets/model"], function(_, $, moment, W
 
 		oAuth: {
 			id: "559765430405-5rvu6sms3mc111781cfgp1atb097rrph.apps.googleusercontent.com",
-			secret: "__API_KEY_analytics__",
+			//secret: "__API_KEY_analytics__",
+			secret: "tMLIjQ6-ZpbR3dLMpYFci4MW",
 			scope: "https://www.googleapis.com/auth/analytics.readonly"
 		},
 

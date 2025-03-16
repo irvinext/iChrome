@@ -4,6 +4,7 @@
 define(["jquery", "widgets/framefix"], function($, frameFix) {
 	return {
 		id: 31,
+		unlisted: true,
 		sort: 240,
 		size: 5,
 		order: 13,

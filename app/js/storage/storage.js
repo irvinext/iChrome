@@ -135,13 +135,11 @@ define([
 				return;
 			}
 
-			var mark = Track.time();
-
 			API.get({
 				modifiedSince: storage.modified,
 				fromInterval: fromInterval ? 1 : undefined
 			}, function(err, data) {
-				mark("Sync", "Load");
+				Track.time("Sync", "Load");
 
 				if (!err && data) {
 					if (data.modified === false) {
@@ -253,8 +251,6 @@ define([
 
 				Status.log("Starting sync save");
 
-				var mark = Track.time();
-
 				API.sync({
 					tabs: storage.tabsSync,
 					themes: storage.themes,
@@ -272,7 +268,7 @@ define([
 						Browser.storage.config = JSON.stringify(local);
 					}
 
-					mark("Sync", "Save");
+					Track.time("Sync", "Save");
 
 					cb();
 				});

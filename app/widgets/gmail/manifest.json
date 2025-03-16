@@ -7,7 +7,7 @@
 	"css": "style.css",
 	"icon": "icon.png",
 	"sizes": ["variable"],
-	"listed": true,
+	"listed": false,
 
 	"views": {
 		"default": "view",

@@ -73,7 +73,8 @@ define(["lodash", "widgets/model"], function(_, WidgetModel) {
 
 		oAuth: {
 			id: "559765430405-jtbjv5ivuc17nenpsl4dfk9r53a3q0hg.apps.googleusercontent.com",
-			secret: "__API_KEY_drive__",
+			//secret: "__API_KEY_drive__",
+			secret: "uzvC025Z3R12syGZ52hFDyHx",
 			scope: "https://www.googleapis.com/auth/drive.readonly"
 		},
 

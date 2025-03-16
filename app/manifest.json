@@ -35,19 +35,24 @@
 			"all_frames": true
 		}
 	],
-	"web_accessible_resources": [
-		"index.html",
-		"uniqueid_19548234.png"
-	],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "index.html",
+                "uniqueid_19548234.png"
+            ],
+            "matches": ["<all_urls>"]
+        }
+    ],
 	"background": {
-		"scripts": ["js/background.js"]
+		 "service_worker": "js/background.js"
 	},
 	"icons": {
 		"16": "icon/16.png",
 		"48": "icon/48.png",
 		"128": "icon/128.png"
 	},
-	"browser_action": {},
+	"action": {},
 	"options_page": "index.html#settings",
 	"chrome_settings_overrides": {
 		"homepage": "https://ichro.me/redirect"
@@ -56,22 +61,25 @@
 		"storage",
 		"cookies",
 		"sessions",
-		"<all_urls>",
 		"webRequest",
 		"system.cpu",
 		"system.memory",
 		"unlimitedStorage",
 		"chrome://favicon/",
-		"webRequestBlocking"
+		"declarativeNetRequest"
 	],
 	"optional_permissions": [
 		"tabs",
 		"topSites",
 		"bookmarks",
-		"management"
+		"management",
+		"identity"
 	],
-	"version": "3.0.45.26",
-	"manifest_version": 2,
+    "host_permissions": [
+        "<all_urls>"
+    ],	
+	"version": "4.0.0.0",
+	"manifest_version": 3,
 	"default_locale": "en",
 	"short_name": "ProductivityTab",
 	"offline_enabled": true,
@@ -80,5 +88,8 @@
 	"description": "__MSG_extDescription__",
 	"update_url": "http://clients2.google.com/service/update2/crx",
 	"key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCNyJlz1NfUOvI1q7YiXjTvStaC99OmJCfnfo07UVF6N7/5coAGTUAASUYmdFd5LxTt4GOrODbzbbdOKO3iEuDtUZFklgvMO81tmoRPJNMf0cb1rpSfnmmB33xtgi2CWzmlVzx3pdbbkGwo2R+rwbeAQkG+zXvzgmnHDSt1a5zqjwIDAQAB",
-	"content_security_policy": "script-src 'self' 'unsafe-eval' 'sha256-hNWUbwB8ZS/vP+O4TfqZ/mmkMSYSJqGZ/4t5SSwAEk0=' 'sha256-1U43HAOlAXz6irAbXBbIpCr9fs/nLVDSCTx+uGZSAvY=' https://*.facebook.net https://*.facebook.com https://www.google-analytics.com https://*.uservoice.com https://www.google.com https://js.braintreegateway.com https://assets.braintreegateway.com https://www.paypalobjects.com https://cdn.pubguru.com https://z-na.amazon-adsystem.com https://worldtimeapi.org https://www.gstatic.com; object-src 'self'"
+	"content_security_policy": {
+		"extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'",
+		"sandbox": "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://connect.facebook.net; child-src 'self';"
+	}	
 }

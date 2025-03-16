@@ -286,6 +286,10 @@ define([
 			return render.getTemplate("widgets." + this.widget.name + (name ? "." + name : ""));
 		},
 
+		getRowTemplate: function(name) {
+			return render.getRowTemplate("widgets." + this.widget.name + (name ? "." + name : ""));
+		},
+
 
 		/**
 		 * Renders a widget's template

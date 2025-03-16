@@ -288,7 +288,7 @@ define(["jquery", "lodash", "moment", "browser/api"], function($, _, moment, Bro
 
 
 			this.utils.render(data, {
-				listing: this.utils.getTemplate("listing")
+				listing: this.utils.getRowTemplate("listing")
 			});
 		}
 	};

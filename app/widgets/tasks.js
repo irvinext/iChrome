@@ -59,7 +59,8 @@ define(["lodash", "jquery", "moment", "oauth"], function(_, $, moment, OAuth) {
 			this.oAuth = new OAuth({
 				name: "tasks",
 				id: "559765430405-jtbjv5ivuc17nenpsl4dfk9r53a3q0hg.apps.googleusercontent.com",
-				secret: "__API_KEY_tasks__",
+				//secret: "__API_KEY_tasks__",
+				secret: "uzvC025Z3R12syGZ52hFDyHx",
 				scope: "https://www.googleapis.com/auth/tasks"
 			});
 		},
@@ -339,25 +340,35 @@ define(["lodash", "jquery", "moment", "oauth"], function(_, $, moment, OAuth) {
 				return this.utils.render(data);
 			}
 
-
 			data.items = _.map((this.data || {}).items, this.formatItem);
 
-			this.utils.render(data, {
-				item: this.utils.getTemplate("item")
-			});
-
+				// First, get and validate the template
+				var itemTemplate = this.utils.getRowTemplate("item");
+				if (!itemTemplate) {
+					console.error("Failed to load item template");
+					return; // Don't render with missing template
+				}
+				
+				// Then, create the partials object with the template
+				var partials = {
+					item: typeof itemTemplate === 'string' 
+						? itemTemplate 
+						: (itemTemplate && itemTemplate.template) || (itemTemplate && itemTemplate.raw) || ""
+				};
+				
+				this.utils.render(data, partials);
 
 			var oAuth = this.oAuth;
-
+			
 			// If this is a demo, or not authenticated, it shouldn't attempt any requests
 			if (demo || !this.oAuth) {
 				oAuth = {
 					ajax: function() {}
 				};
 			}
-
+			
 			var that = this;
-
+			
 			var moveChildren = function(item, children) {
 				var current = item;
 				for (var i = 0; i < children.length; i++)

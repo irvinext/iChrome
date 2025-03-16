@@ -176,6 +176,7 @@ define([
 				this.Speech.on("result", this.onSpeechResult, this);
 
 				this.once("inserted", function() {
+					//MP3: the preload-search-script was moved to .js file. Fix this
 					// The preloadInput element captures text that's entered while the page is
 					// still loading so users that type quickly when opening a new tab don't
 					// lose the first part of their searches

@@ -15,14 +15,6 @@
 		-->
 		<input type="search" id="preload-search-input" data-submit="false" autofocus="autofocus" tabindex="-1" style="position:fixed;top:-100vh;left:-100vw" />
 
-		<script id="preload-search-script">
-			document.getElementById("preload-search-input").onkeydown = function(e) {
-				if (e.keyCode === 13) {
-					this.setAttribute("data-submit", "true");
-				}
-			};
-		</script>
-
 		<div class="loading">
 			<!-- This is nested inside the element so it gets cleaned up after load along with the element -->
 			<style>
@@ -65,27 +57,6 @@
 		</div>
 
 		<link href="css/style.css?__NO_CACHE__" rel="stylesheet" />
-
-		<!--
-			The hash listed in the manifest's CSP must be updated any time this script is changed
-		-->
-		<script>
-			(function() {
-				// Preload all fonts using the Font Loading API so they're available for the first paint
-				document.fonts.load("300 16px Open Sans, Roboto");
-				document.fonts.load("400 16px Open Sans, Roboto, Entypo, Material Icons");
-				document.fonts.load("500 16px Roboto");
-				document.fonts.load("600 16px Open Sans");
-				document.fonts.load("700 16px Open Sans, Roboto");
-
-				// Preload the default background image, again so it's available at the first paint
-				if (localStorage.themeImg) {
-					var img = new Image();
-
-					img.src = localStorage.themeImg;
-				}
-			})();
-		</script>
 
 		<div class="voicebar">
 			<div class="text">Listening...</div>

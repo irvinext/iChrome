@@ -1,7 +1,7 @@
 /**
  * This manages theme downloading and caching
  */
-define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/storage", "core/status", "lib/parseurl"], function(_, $, Hogan, Backbone, FileSystem, Storage, Status, parseUrl) {
+define(["lodash", "jquery", "mustache", "backbone", "storage/filesystem", "storage/storage", "core/status", "lib/parseurl"], function(_, $, Mustache, Backbone, FileSystem, Storage, Status, parseUrl) {
 	var Model = Backbone.Model.extend({
 		initialize: function() {
 			Storage.on("done updated", function(storage) {
@@ -14,7 +14,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 			}, this);
 		}
 	});
-
 
 	/**
 	 * The cacher utility
@@ -44,7 +43,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 
 	Cacher.prototype.model = new Model();
 
-
 	/**
 	 * This function does the actual theme caching
 	 *
@@ -67,7 +65,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 			theme = this.theme;
 		}
 
-
 		var cached = this.model.get("cached"),
 			ids;
 
@@ -87,25 +84,21 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 			if (cached[theme.id].lastFetched) {
 				theme.lastFetched = cached[theme.id].lastFetched;
 			}
-		}
-		else {
+		} else {
 			if (theme.images) {
 				ids = theme.images.filter(function(e) {
 					return !cached[e];
 				});
-			}
-			else {
+			} else {
 				ids = [theme.id];
 			}
 		}
-
 
 		// If the theme is already cached, cleanup
 		if (!ids.length) {
 			if (cached[theme.id] && cached[theme.id].image) {
 				return this.cleanup(cached[theme.id].image);
-			}
-			else {
+			} else {
 				return this.cleanup();
 			}
 		}
@@ -153,8 +146,7 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 
 									if (active === 0) {
 										that.cleanup(cached[id][isVideo ? "video" : "image"]);
-									}
-									else {
+									} else {
 										// length - active might seem to be vulnerable to a race condition at first
 										// glance, but the async handlers (dir.getFile) are pushed to the end of the
 										// call stack so they can only be called _after_ the forEach is finished
@@ -175,7 +167,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 		}, err);
 	};
 
-
 	/**
 	 * The global error handler
 	 *
@@ -193,7 +184,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 
 		this.trigger("error", e);
 	};
-
 
 	/**
 	 * Fetches a theme's RSS feed.  Callable as a standalone function.
@@ -219,23 +209,22 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 			return cb(false);
 		}
 
-
 		var utils = {
-				Math: {
-					rand: function() {
-						return function(max) {
-							return Math.floor(Math.random() * max);
-						};
-					},
-					drand: function() {
-						return function(max) {
-							var rand = Math.sin(new Date().setHours(0, 0, 0, 0)) * 10000;
+			Math: {
+				rand: function() {
+					return function(max) {
+						return Math.floor(Math.random() * max);
+					};
+				},
+				drand: function() {
+					return function(max) {
+						var rand = Math.sin(new Date().setHours(0, 0, 0, 0)) * 10000;
 
-							return Math.floor((rand - Math.floor(rand)) * max);
-						};
-					}
+						return Math.floor((rand - Math.floor(rand)) * max);
+					};
 				}
-			};
+			}
+		};
 
 		// These are utilities that the URL and image parser are rendered with
 		// They can be used to incorporate things like random numbers
@@ -246,14 +235,12 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 						return Math[e].apply(window, args.split(", "));
 					};
 				};
-			}
-			else {
+			} else {
 				utils.Math[e] = Math[e];
 			}
 		});
 
-
-		$.get(Hogan.compile(theme.url).render(utils), function(d) {
+		$.get(Mustache.render(theme.url, utils), function(d) {
 			try {
 				var doc;
 
@@ -264,21 +251,17 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 
 					if (theme.attr === "text") {
 						url = url.text();
-					}
-					else if (theme.attr === "html") {
+					} else if (theme.attr === "html") {
 						url = url.html();
-					}
-					else {
+					} else {
 						url = url.attr(theme.attr);
 					}
 
 					utils.res = url;
-				}
-				else {
+				} else {
 					if (typeof d === "object") {
 						utils.res = d;
-					}
-					else {
+					} else {
 						utils.res = JSON.parse(d);
 					}
 				}
@@ -291,20 +274,17 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 							url: utils.res.sourceUrl,
 							source: (utils.res.author || "") + (utils.res.author && (utils.res.copyright || utils.res.source) ? " — " : "") + (utils.res.copyright || utils.res.source || "")
 						};
-					}
-					else if ((theme.id === 82 || theme.id === 83) && utils.res.images && utils.res.images[0] && utils.res.images[0].copyright) {
+					} else if ((theme.id === 82 || theme.id === 83) && utils.res.images && utils.res.images[0] && utils.res.images[0].copyright) {
 						theme.currentImage = {
 							source: utils.res.images[0].copyrightsource,
 							name: utils.res.images[0].copyright.replace(utils.res.images[0].copyrightsource, "").replace(/\(\s*?\)/g, "").trim()
 						};
-					}
-					else if (theme.id === 84 && utils.res.free && utils.res.free[0]) {
+					} else if (theme.id === 84 && utils.res.free && utils.res.free[0]) {
 						theme.currentImage = {
 							name: utils.res.free[0].title,
 							source: utils.res.free[0].vendor
 						};
-					}
-					else if (theme.id === 86) {
+					} else if (theme.id === 86) {
 						theme.currentImage = {
 							name: doc.find("item title").text(),
 							source: doc.find("item source").text(),
@@ -312,16 +292,14 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 							url: doc.find("item guid").text()
 						};
 					}
-				}
-				catch (e) {}
+				} catch (e) {}
 
-				theme.image = Hogan.compile(theme.format).render(utils);
+				theme.image = Mustache.render(theme.format, utils);
 
 				theme.lastFetched = new Date().getTime();
 
 				cb(theme);
-			}
-			catch(e) {
+			} catch (e) {
 				Status.error(e);
 
 				cb(false);
@@ -330,7 +308,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 			cb(false);
 		});
 	};
-
 
 	/**
 	 * Cleans up the theme object, restoring metadata and triggers
@@ -347,8 +324,7 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 
 		if (!theme.images && image) {
 			theme[isVideo ? "video" : "image"] = image;
-		}
-		else {
+		} else {
 			delete theme.video;
 			delete theme.image;
 		}
@@ -378,7 +354,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 		this.trigger("complete", theme);
 	};
 
-
 	Cacher.Custom = {
 		/**
 		 * Caches a custom theme's image by URL, saves the theme and returns
@@ -401,7 +376,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 				return;
 			}
 
-
 			var err = function(e) {
 				if (e && e.name === "InvalidStateError") {
 					return this.cache(theme, id, cb);
@@ -411,7 +385,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 
 				cb(theme);
 			}.bind(this);
-
 
 			var url = parseUrl(theme.image),
 				ext = url.match(/\.([0-9a-z]+)(?:[\?#]|$)/i);
@@ -459,7 +432,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 			}, err);
 		},
 
-
 		/**
 		 * Deletes a theme and it's image and re-enumerates the remaining themes
 		 *
@@ -480,7 +452,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 				}.bind(this));
 			}.bind(this));
 		},
-
 
 		/**
 		 * Re-enumerates the saved images of custom themes to match their index
@@ -522,8 +493,7 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 												cb();
 											}
 										});
-									}
-									else {
+									} else {
 										done++;
 
 										if (done === length) {
@@ -542,8 +512,7 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 									});
 
 									rename();
-								}
-								else {
+								} else {
 									entries = entries.concat(Array.prototype.slice.call(results, 0));
 
 									read();
@@ -554,7 +523,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 				}, err);
 			}, err);
 		},
-
 
 		/**
 		 * Saves a theme's uploaded image, along with the theme and returns the newly saved theme object
@@ -598,7 +566,6 @@ define(["lodash", "jquery", "hogan", "backbone", "storage/filesystem", "storage/
 				}, err);
 			}, err);
 		},
-
 
 		/**
 		 * Deletes a themes previous image

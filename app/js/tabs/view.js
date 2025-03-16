@@ -266,10 +266,11 @@ define(["jquery", "lodash", "backbone", "core/auth", "core/status", "core/analyt
 			// We avoid inflating impressions by only displaying the ad once the tab is visible
 			// This could be modified to preload the various scripts and only show the ad itself later, but that causes issues with certain ads
 			var displayAd = function() {
-				var rightNow = new Date().toISOString().slice(0,10).replace(/-/g,"");
-				ad.innerHTML = '<button type="button" class="hide-ad"></button>' +
-					'<iframe id="adframe" src="https://ichro.me/adframe/' + placement + "?refresh=" + rightNow + '#' + adId + '" style="' + (leaderboard ? "width:728px;height:90px;" : "width:300px;height:250px;") + '" seamless></iframe>';
-			};
+			 	var rightNow = new Date().toISOString().slice(0,10).replace(/-/g,"");
+			//MF3: removed ads because not allowed by new google policy
+			// 	ad.innerHTML = '<button type="button" class="hide-ad"></button>' +
+			// 		'<iframe id="adframe" src="https://ichro.me/adframe/' + placement + "?refresh=" + rightNow + '#' + adId + '" style="' + (leaderboard ? "width:728px;height:90px;" : "width:300px;height:250px;") + '" seamless></iframe>';
+			 };
 
 			this.once("render:complete", function() {
 				if (this._inserted && this.$el.hasClass("active")) {

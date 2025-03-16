@@ -2,6 +2,7 @@
 	"id": 27,
 	"sort": 320,
 	"name": "drive",
+	"listed": false, 
 	"model": "model",
 	"css": "style.css",
 	"icon": "icon.png",

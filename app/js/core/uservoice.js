@@ -9,9 +9,9 @@ define(["core/auth", "storage/storage", "browser/api"], function(Auth, Storage, 
 		uv.type = "text/javascript";
 		uv.src = "https://widget.uservoice.com/YLT6rl3u3uU75IbSodIBw.js";
 
-		var s = document.getElementsByTagName("script")[0];
-
-		s.parentNode.insertBefore(uv, s);
+		//MF3 : inline script
+		// var s = document.getElementsByTagName("script")[0];
+		// s.parentNode.insertBefore(uv, s);
 
 		window.UserVoice.push(["set", {
 			accent_color: "#448dd6",

@@ -1,5 +1,6 @@
 {
 	"id": 14,
+	"listed": false,
 	"sort": 100,
 	"name": "stocks",
 	"model": "model",

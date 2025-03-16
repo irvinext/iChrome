@@ -7,7 +7,7 @@ require.config({
 		"w": "../widgets",
 		"text": "lib/text",
 		"json": "lib/json",
-		"hogan": "lib/hogan",
+		"mustache": "lib/mustache",
 		"oauth": "lib/oauth",
 		"lodash": "lib/lodash",
 		"moment": "lib/moment",
@@ -21,7 +21,7 @@ require.config({
 		"fullcalendar": "lib/fullcalendar",
 		"gcloader": "lib/gcloader",
 		"feedlyproxy": "lib/feedlyproxy",
-		"cryptoJs": "lib/cryptojs",
+		"cryptoJs": "lib/cryptojs"
 	},
 	map: {
 		"*": {
@@ -52,3 +52,28 @@ if (require.s) {
 require(["core/init", "core/autorun", "core/pgdg"], function(app) {
 	window.App = app;
 });
+
+
+(function() {
+	// Preload all fonts using the Font Loading API so they're available for the first paint
+	document.fonts.load("300 16px Open Sans, Roboto");
+	document.fonts.load("400 16px Open Sans, Roboto, Entypo, Material Icons");
+	document.fonts.load("500 16px Roboto");
+	document.fonts.load("600 16px Open Sans");
+	document.fonts.load("700 16px Open Sans, Roboto");
+
+	// Preload the default background image, again so it's available at the first paint
+	if (localStorage.themeImg) {
+		var img = new Image();
+
+		img.src = localStorage.themeImg;
+	}
+})();
+
+
+//MP3: was in: <script id="preload-search-script">, see searxc.js
+document.getElementById("preload-search-input").onkeydown = function(e) {
+	if (e.keyCode === 13) {
+		this.setAttribute("data-submit", "true");
+	}
+};

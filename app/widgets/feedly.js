@@ -38,6 +38,7 @@ define(["jquery", "moment", "oauth", "lodash"], function($, moment, OAuth, _) {
 
 	return {
 		id: 19,
+		unlisted: true, //MF3
 		sort: 170,
 		size: 6,
 		order: 22,
@@ -428,13 +429,42 @@ define(["jquery", "moment", "oauth", "lodash"], function($, moment, OAuth, _) {
 			this.oAuth = new OAuth({
 				id: "ichrome",
 				name: "feedly",
-				redirectURL: "http://localhost/",
-				secret: "__API_KEY_feedly__",
+				redirectURL: chrome.identity.getRedirectURL(),
+				//secret: "__API_KEY_feedly__",
+				secret: "FE01EPSTO5GAZNO3MQZXLUCCV19T",
 				scope: "https://cloud.feedly.com/subscriptions",
 				tokenURL: "https://cloud.feedly.com/v3/auth/token",
 				authURL: "https://cloud.feedly.com/v3/auth/auth?response_type=code&client_id={{clientID}}&redirect_uri={{redirectURL}}&scope={{scope}}"
-			});
-		},
+				});
+				
+				// Override OAuth methods to use chrome.identity
+				if (this.oAuth.startAuthFlow) {
+					this.oAuth.startAuthFlow = function(callback) {
+						var authUrl = this.config.authURL
+							.replace("{{clientID}}", encodeURIComponent(this.config.id))
+							.replace("{{redirectURL}}", encodeURIComponent(this.config.redirectURL))
+							.replace("{{scope}}", encodeURIComponent(this.config.scope));
+							
+						chrome.identity.launchWebAuthFlow({
+							url: authUrl,
+							interactive: true
+						}, function(redirectUrl) {
+							if (chrome.runtime.lastError) {
+								console.error("Auth error:", chrome.runtime.lastError);
+								return;
+							}
+							
+							if (redirectUrl) {
+								// Extract code from URL and exchange for token
+								var code = new URLSearchParams(new URL(redirectUrl).search).get("code");
+								if (code) {
+									this.exchangeCodeForToken(code, callback);
+								}
+							}
+						}.bind(this));
+					};
+				}
+			},
 		getSources: function(cb) {
 			if (!this.oAuth) {
 				this.setOAuth();

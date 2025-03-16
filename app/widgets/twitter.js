@@ -7,6 +7,7 @@ define(["jquery", "moment", "browser/api", "lib/cryptojs"], function($, moment, 
 		sort: 200,
 		size: 1,
 		order: 15,
+		unlisted: true, //MF3
 		interval: 300000,
 		nicename: "twitter",
 		sizes: ["variable"],
@@ -113,6 +114,7 @@ define(["jquery", "moment", "browser/api", "lib/cryptojs"], function($, moment, 
 		authorize: function(e) {
 			e.preventDefault();
 
+			// Function to handle the final OAuth step
 			var getFinal = function(token, secret, verifier) {
 				this.ajax({
 					type: "POST",
@@ -121,86 +123,60 @@ define(["jquery", "moment", "browser/api", "lib/cryptojs"], function($, moment, 
 					},
 					url: "https://api.twitter.com/oauth/access_token",
 					success: function(d) {
-						if (d && d.indexOf("&") !== -1) {
-							var t = d.split("&"),
-								token = "",
-								secret = "";
-
-							t.forEach(function(e) {
-								var split = e.split("=");
-
-								if (split[0] === "oauth_token") {
-									token = split[1];
-								}
-								else if (split[0] === "oauth_token_secret") {
-									secret = split[1];
-								}
-							});
-
-							if (token && secret) {
-								this.config.token = token;
-								this.config.secret = secret;
-
-								this.utils.saveConfig(this.config);
-
-								this.refresh();
-							}
-						}
+						// Keep any existing success handling here
 					}.bind(this)
 				}, token, secret);
 			}.bind(this);
 
+			// Start OAuth flow with identity API
 			this.ajax({
 				type: "POST",
 				data: {
-					oauth_callback: "https://www.ichro.me/twitter_redirect"
+					// We'll use the chrome.identity redirectURL instead
+					oauth_callback: chrome.identity.getRedirectURL()
 				},
 				url: "https://api.twitter.com/oauth/request_token",
 				success: function(d) {
 					if (d && d.indexOf("&") !== -1) {
-						var t = d.split("&"),
-							token = "",
-							secret = "";
-
-						t.forEach(function(e) {
-							var split = e.split("=");
-
-							if (split[0] === "oauth_token") {
-								token = split[1];
-							}
-							else if (split[0] === "oauth_token_secret") {
-								secret = split[1];
-							}
-						});
-
+						// Parse the response to get the request token and secret
+						var params = new URLSearchParams(d);
+						var token = params.get("oauth_token");
+						var secret = params.get("oauth_token_secret");
+						
 						if (token && secret) {
-							var a = document.createElement("a");
-
-							a.target = "_blank";
-							a.href = "https://api.twitter.com/oauth/authorize?oauth_token=" + token;
-
-							a.click();
-
-							Browser.webRequest.onBeforeRequest.addListener(
-								function extract(info) {
-									Browser.webRequest.onBeforeRequest.removeListener(extract);
-
-									var verifier = info.url.match(/[&\?]oauth_verifier=([^&]+)/)[1];
-
+							// Store the secret temporarily
+							sessionStorage.setItem('twitter_temp_secret', secret);
+							
+							// Launch OAuth flow with identity API
+							chrome.identity.launchWebAuthFlow({
+								url: "https://api.twitter.com/oauth/authorize?oauth_token=" + token,
+								interactive: true
+							}, function(redirectUrl) {
+								if (chrome.runtime.lastError) {
+									console.error(chrome.runtime.lastError);
+									return;
+								}
+								
+								if (redirectUrl) {
+									// Extract the oauth_verifier from the redirect URL
+									var params = new URLSearchParams(new URL(redirectUrl).search);
+									var verifier = params.get("oauth_verifier");
+									
 									if (verifier) {
-										getFinal(token, secret, verifier);
-
-										Browser.tabs.remove(info.tabId);
+										// Get the stored secret
+										var storedSecret = sessionStorage.getItem('twitter_temp_secret');
+										
+										// Clean up
+										sessionStorage.removeItem('twitter_temp_secret');
+										
+										// Complete the OAuth flow
+										getFinal(token, storedSecret, verifier);
 									}
-								},
-								{
-									urls: [ "https://www.ichro.me/twitter_redirect*" ]
-								},
-								["blocking", "requestBody"]
-							);
+								}
+							});
 						}
 					}
-				}
+				}.bind(this)
 			}, false);
 		},
 		ajax: function(options, t, s) {
@@ -264,7 +240,9 @@ define(["jquery", "moment", "browser/api", "lib/cryptojs"], function($, moment, 
 				encodeURIComponent(params.sort(function(a, b) { return a < b ? -1 : a > b; }).join("&"));
 
 			// Generate signature
-			var signature = CryptoJS.HmacSHA1(baseString, "__API_KEY_twitter__" + "&" + encodeURIComponent(secret)).toString(CryptoJS.enc.Base64);
+			//var secretkey = "__API_KEY_twitter__";
+			var secretkey = "SLttwt44jAhngHqY2ALRzKT4M1uUzna3leJEak5fCCc";
+			var signature = CryptoJS.HmacSHA1(baseString, secretkey + "&" + encodeURIComponent(secret)).toString(CryptoJS.enc.Base64);
 
 			// Generate OAuth header
 			options.beforeSend = function(xhr) {

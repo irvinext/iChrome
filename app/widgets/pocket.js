@@ -29,87 +29,49 @@ define(["jquery", "lodash", "moment", "backbone", "browser/api", "oauth"], funct
 			// the original OAuth library so we need to modify the library
 			this.oAuth.startAuthFlow = function(cb) {
 				var that = this;
-
-				var createWindow = function() {
-					that.openWindow = true;
-
-					$.ajax({
-						type: "POST",
-						url: "https://getpocket.com/v3/oauth/request",
-						data: {
-							consumer_key: that.config.id,
-							redirect_uri: that.config.redirectURL
-						},
-						beforeSend: function(xhr) {
-							xhr.setRequestHeader("X-Accept", "application/json");
-						},
-						success: function(d) {
-							if (typeof d !== "object" || !d.code) {
-								that.openWindow = false;
-
+				
+				// Get request token first
+				$.ajax({
+					type: "POST",
+					url: "https://getpocket.com/v3/oauth/request",
+					data: {
+						consumer_key: that.config.id,
+						redirect_uri: that.config.redirectURL
+					},
+					beforeSend: function(xhr) {
+						xhr.setRequestHeader("X-Accept", "application/json");
+					},
+					success: function(d) {
+						if (typeof d !== "object" || !d.code) {
+							return;
+						}
+						
+						// Build the authorization URL
+						var url = that.config.authURL
+							.replace("{{requestToken}}", encodeURIComponent(d.code))
+							.replace("{{redirectURL}}", encodeURIComponent(that.config.redirectURL));
+						
+						// Use chrome.identity API to handle the OAuth flow
+						chrome.identity.launchWebAuthFlow({
+							url: url,
+							interactive: true
+						}, function(redirectUrl) {
+							// Check for errors
+							if (chrome.runtime.lastError) {
+								console.error("OAuth error:", chrome.runtime.lastError);
 								return;
 							}
-
-							var url = that.config.authURL
-								.replace("{{requestToken}}", encodeURIComponent(d.code))
-								.replace("{{redirectURL}}", encodeURIComponent(that.config.redirectURL));
-
-							Browser.windows.create({
-								url: 'https://ichro.me/redirect.html?' + url,
-								width: 560,
-								height: 600,
-								type: "popup",
-								focused: true,
-								top: Math.round((screen.availHeight - 600) / 2),
-								left: Math.round((screen.availWidth - 560) / 2)
-							}, function(win) {
-								that.openWindow = win.id;
-
-								Browser.webRequest.onBeforeRequest.addListener(
-									function() {
-										this.exchangeCode(d.code, cb);
-
-										Browser.windows.remove(win.id);
-
-										return {
-											cancel: true
-										};
-									}.bind(that),
-									{
-										windowId: win.id,
-										types: ["main_frame"],
-										urls: [that.config.redirectURL + "*"]
-									},
-									["blocking"]
-								);
-							});
-						}
-					});
-
-					// Make sure we don't lock up the OAuth instance
-					setTimeout(function() {
-						if (that.openWindow === true) {
-							that.openWindow = false;
-						}
-					}, 10000);
-				};
-
-				if (typeof this.openWindow === "number") {
-					Browser.windows.get(this.openWindow, function(win) {
-						if (Browser.runtime.lastError) {
-							createWindow();
-						}
-						else {
-							Browser.windows.update(win.id, { focused: true });
-						}
-					});
-				}
-				else if (this.openWindow === true) {
-					return;
-				}
-				else {
-					createWindow();
-				}
+							
+							if (redirectUrl) {
+								// Successfully got the redirect, now exchange the code for token
+								that.exchangeCode(d.code, cb);
+							}
+						});
+					},
+					error: function(xhr, status, error) {
+						console.error("Pocket API error:", status, error);
+					}
+				});
 			};
 
 			this.oAuth.exchangeCode = function(code, cb) {
@@ -287,6 +249,7 @@ define(["jquery", "lodash", "moment", "backbone", "browser/api", "oauth"], funct
 		id: 45,
 		sort: 350,
 		size: 1,
+		unlisted: true, //MF3
 		interval: 300000,
 		nicename: "pocket",
 		sizes: ["variable"],

@@ -1,3 +1,5 @@
+//MF3 : https://developer.chrome.com/docs/extensions/develop/migrate/improve-security#remove-remote-code
+/* 
 window.pgjs = window.pgjs || {};
 window.pgjs.gdpr = window.pgjs.gdpr || {};
 window.pgjs.publisher = window.pgjs.publisher || {};
@@ -13,3 +15,4 @@ script.type = "text/javascript";
 script.src = 'https://cdn.pubguru.com/pg.js';
 var target = document.getElementsByTagName("head")[0];
 target.insertBefore(script, target.firstChild);
+*/

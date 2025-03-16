@@ -276,10 +276,30 @@ define(["lodash", "jquery", "widgets/views/main"], function(_, $, WidgetView) {
 			return data;
 		},
 
+		// render: function(data, partials) {
+		// 	return WidgetView.prototype.render.call(this, data || this.model.data, partials || {
+		// 		details: this.widget.templates.details
+		// 	});
+		// }
+
 		render: function(data, partials) {
-			return WidgetView.prototype.render.call(this, data || this.model.data, partials || {
-				details: this.widget.templates.details
-			});
-		}
+			// Create string-based partials that Mustache can handle
+			var stringPartials = {};
+			
+			if (!partials) {
+				// Extract raw template string if available
+				if (this.widget.templates.detailsRaw) {
+					stringPartials.details = this.widget.templates.detailsRaw;
+				} else {
+					// Fall back to empty string if raw template isn't available
+					stringPartials.details = "";
+				}
+			} else {
+				// Use provided partials
+				stringPartials = partials;
+			}
+			
+			return WidgetView.prototype.render.call(this, data || this.model.data, stringPartials);
+		}		
 	});
 });

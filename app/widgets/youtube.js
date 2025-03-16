@@ -137,8 +137,8 @@ define(["lodash", "jquery", "moment"], function(_, $, moment) {
 			this.config.user = "";
 			this.refresh();
 		},
-		//apiKey: "AIzaSyBWWt5WxgH6uX2Q39CkPdJqm4RVIPidJeo",
-		apiKey: "__API_KEY_youtube__",
+		apiKey: "AIzaSyBWWt5WxgH6uX2Q39CkPdJqm4RVIPidJeo",
+		//apiKey: "__API_KEY_youtube__",
 		refresh: function() {
 			var that = this;
 

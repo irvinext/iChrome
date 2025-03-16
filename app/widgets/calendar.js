@@ -133,7 +133,8 @@
 			this.oAuth = new OAuth({
 				name: "calendar",
 				id: "559765430405-2710gl95r9js4c6m4q9nveijgjji50b8.apps.googleusercontent.com",
-				secret: "__API_KEY_calendar__",
+				//secret: "__API_KEY_calendar__",
+				secret: "QLlFpcECWen5pm-7XWj-fMS3",
 				scope: "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar"
 			});
 		},

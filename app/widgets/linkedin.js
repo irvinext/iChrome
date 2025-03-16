@@ -8,6 +8,7 @@ define(["jquery", "lodash", "browser/api", "widgets/framefix"], function($, _, B
 		id: 43,
 		sort: 360,
 		size: 5,
+		unlisted: true,
 		nicename: "linkedin",
 		sizes: ["variable"],
 		settings: [
